@@ -8,31 +8,30 @@ app.get('/api/planets', (req,res) => {
 })
 
 app.get('/api/planets/:id',(req,res) => {
-  const {id} = req.params
-  const planet = planets.find((planet) => planet.id === Number(id))
-  res.json(planet)
-})
+  const express = require('express')
+const {planets,getAll,getoneById,create,updateById,deleteById} = require('./planets.js')
 
-app.post('/api/planets',(req,res) => {
-  const {id,name} = req.body
-  const newPlanet = {id,name}
-  planets = [...planets, newPlanet]
 
-  res.status(201).json({msg: 'the planet is added'})
-})
+const app = express()
+app.use(express.json())
 
-app.put('/api/planets/:id',(req,res) => {
-const {id} = req.params
-const planet = req.body
-planets[Number(id) - 1] = planet
-res.status(200).json({msg: "value changed", data: planets})
-})
+app.get('/api/planets', getAll)
 
-app.delete('/api/planets/:id',(req,res) => {
-  const {id} = req.params
-  const index = planets.findIndex(planet => planet.id === id)
-  planets.splice(index,1)
-  res.status(200).json({msg: "deleted", data : planets})
-})
+
+app.get('/api/planets/:id',getoneById )
+  
+
+
+app.post('/api/planets',create)
+  
+
+
+app.put('/api/planets/:id',updateById)
+
+
+
+app.delete('/api/planets/:id',deleteById)
+
+
 
 app.listen(3000)
