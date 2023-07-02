@@ -1,42 +1,38 @@
-const express = require('express')
-const {getAll,getoneById,create,updateById,deleteById,createImage} = require('./planets.js')
-const multer = require("multer")
+const express = require("express")
+const db = require("./db")
+const bodyParser = require("body-parser")
+const { login, signup, logout } = require("./users")
+const authorize = require("./authorize")
 
-const storage = multer.diskStorage({
-    destination: (req,file,cb) => {
-        cb(null,'./uploads')
-    },
-    filename: (req,file,cb) => {
-        cb(null,file.originalname)
-    }
-})
-const upload = multer({storage})
+
 
 const app = express()
-app.use(express.json())
 
-app.get('/api/planets', getAll)
- 
-
-app.get('/api/planets/:id',getoneById )
-  
+app.use(bodyParser.json())
 
 
-app.post('/api/planets',create)
-  
+app.get("/", async (req,res) => {
+const data = await db.query(`SELECT * FROM users`)
+res.status(200).json(data)
+})
+app.post("/users", async (req,res) => {
+    const {name} = req.body
+     await db.none(`INSERT INTO users (name) VALUES ($1)`,[name])
+    res.status(200).json({msg: "name added"})
+})
 
 
-app.put('/api/planets/:id',updateById)
+app.post("/users/login",login)
 
+app.post("/users/signup",signup)
 
+app.get("/users/logout",authorize,logout)
 
-app.delete('/api/planets/:id',deleteById)
-
-
-app.post('/api/planets/:id/image',upload.single('image'),createImage)
-
-
-
+app.get("/:id", async (req,res) => {
+    const {id} = req.params
+    const data = await db.one(`SELECT * FROM users WHERE id=$1`,Number(id))
+    res.status(200).json(data)
+    })
 app.listen(3000, () => {
     console.log("listening")
 })
